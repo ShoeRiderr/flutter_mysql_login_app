@@ -1,19 +1,78 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:http/http.dart';
 import 'home_page.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
   static String tag = 'login-page';
-
   @override
   State<LoginPage> createState() => _LoginPageState();
 }
 
 class _LoginPageState extends State<LoginPage> {
+  TextEditingController nameController = TextEditingController();
+  TextEditingController passwordController = TextEditingController();
+
+  Future login(BuildContext context) async {
+    String name = nameController.text;
+    String password = passwordController.text;
+
+    if (name == "" || password == "") {
+      Fluttertoast.showToast(
+          msg: "Name and password have to be filled",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.CENTER,
+          timeInSecForIosWeb: 1,
+          backgroundColor: Colors.redAccent,
+          textColor: Colors.white,
+          fontSize: 16.0
+      );
+      return;
+    }
+
+    String? domain = dotenv.env["AUTH_API"];
+    String url = "$domain/login_connection/login.php";
+
+    Response response = await post(url, body: {
+      "name": name,
+      "password": password
+    });
+
+    var data = json.decode(response.body);
+
+    if (data.status) {
+      Fluttertoast.showToast(
+          msg: "Welcome!",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.CENTER,
+          timeInSecForIosWeb: 1,
+          backgroundColor: Colors.lightBlue,
+          textColor: Colors.white,
+          fontSize: 16.0
+      );
+      Navigator.of(context).pushNamed(HomePage.tag);
+    } else {
+      Fluttertoast.showToast(
+          msg: "Username or password is not correct.",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.CENTER,
+          timeInSecForIosWeb: 1,
+          backgroundColor: Colors.lightBlue,
+          textColor: Colors.white,
+          fontSize: 16.0
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
 
     final name = TextFormField(
+      controller: nameController,
       keyboardType: TextInputType.text,
       autofocus: false,
       decoration: InputDecoration(
@@ -26,6 +85,7 @@ class _LoginPageState extends State<LoginPage> {
     );
 
     final password = TextFormField(
+        controller: passwordController,
         autofocus: false,
         obscureText: true,
         decoration: InputDecoration(
@@ -45,7 +105,7 @@ class _LoginPageState extends State<LoginPage> {
           minWidth: 200.0,
           height: 42.0,
           onPressed: () {
-            Navigator.of(context).pushNamed(HomePage.tag);
+            login(context);
           },
           color: Colors.lightBlueAccent,
           child: const Text('Log In', style: TextStyle(color: Colors.white)),

@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
 import 'login_page.dart';
 import 'home_page.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-void main() => runApp(const MyApp());
+Future main() async {
+  await dotenv.load(fileName: ".env");
+
+  runApp(const MyApp());
+}
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
-  // This widget is the root of your application.
 
   @override
   Widget build(BuildContext context) {
@@ -16,7 +20,7 @@ class MyApp extends StatelessWidget {
     };
 
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Login MySQL App',
       theme: ThemeData(
 
         primarySwatch: Colors.blue,
